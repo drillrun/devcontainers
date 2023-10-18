@@ -1,0 +1,77 @@
+name: "validate, test, build and publish features"
+on:
+    push:
+      branches: ["main"]
+    pull_request:
+      branches: ["main"]
+    workflow_dispatch:
+
+jobs:
+    test:
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          image: ["alpine", "debian", "ubuntu"]
+      steps:
+        - uses: actions/checkout@v4
+        - run: |
+            npm install -g @devcontainers/cli
+            devcontainer features test -p features/ -i ${{ matrix.image }}
+        - uses: devcontainers/action@v1
+          with:
+            validate-only: true
+            base-path-to-features: features/src/
+    build:
+      runs-on: ubuntu-latest
+      needs: [test]
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      steps:
+        - uses: actions/checkout@v4
+        - uses: devcontainers/action@v1
+          with:
+            publish-features: ${{ github.event.base_ref == 'refs/heads/main' }}
+            base-path-to-features: features/src/
+            generate-docs: "true"
+        - uses: stefanzweifel/git-auto-commit-action@v5
+          with:
+            branch: auto-doc-update-${{ github.run_id }}
+            create_branch: true
+            commit_message: Automated documentation update for features.
+            file_pattern: features/src/**/README.md
+        - run: |
+            gh pr create                               \
+              --head auto-doc-update-${GITHUB_RUN_ID}  \
+              --fill
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     continue-on-error: true
+#     strategy:
+#       matrix:
+#         features: ["easy-container-hooks", "direnv", "mcfly", "minio-client"]
+#         baseImage:
+#           - debian:latest
+#           - ubuntu:latest
+#           - mcr.microsoft.com/devcontainers/base:ubuntu
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: "Install latest devcontainer CLI"
+#         run: npm install -g @devcontainers/cli
+
+#       - name: "Generating tests for '${{ matrix.features }}' against '${{ matrix.baseImage }}'"
+#         run: devcontainer features test -f ${{ matrix.features }} -i ${{ matrix.baseImage }} .
+
+#   test-global:
+#     runs-on: ubuntu-latest
+#     continue-on-error: true
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: "Install latest devcontainer CLI"
+#         run: npm install -g @devcontainers/cli
+
+#       - name: "Testing global scenarios"
+#         run: devcontainer features test --global-scenarios-only .
