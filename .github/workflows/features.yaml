@@ -31,7 +31,7 @@ jobs:
         - uses: devcontainers/action@v1
           with:
             publish-features: true
-            base-path-to-features: features/
+            base-path-to-features: features/src/
             generate-docs: "true"
         - uses: stefanzweifel/git-auto-commit-action@v5
           with:
