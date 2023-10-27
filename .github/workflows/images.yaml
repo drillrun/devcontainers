@@ -17,7 +17,13 @@ jobs:
         tag: ["minimal"]
     steps:
       - uses: actions/checkout@v4
+      - id: modifications
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            image: [ 'images/${{ matrix.image }}/**' ]
       - uses: devcontainers/ci@v0.3
+        if: steps.modifications.outputs.image == 'true'
         with: 
           subFolder: images/${{ matrix.image }}/${{ matrix.tag }}
           imageName: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
