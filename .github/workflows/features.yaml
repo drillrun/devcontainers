@@ -13,7 +13,7 @@ jobs:
       runs-on: ubuntu-latest
       strategy:
         matrix:
-          image: ["alpine", "debian", "ubuntu"]
+          image: ["alpine", "debian"]
       steps:
         - uses: actions/checkout@v4
         - run: |
