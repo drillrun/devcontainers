@@ -1,0 +1,27 @@
+{
+    "none": {
+        "image": "alpine:latest",
+        "features": {
+            "pyenv": {
+                "version": "none"
+            }
+        }
+    },
+    "previous": {
+        "image": "alpine:latest",
+        "features": {
+            "pyenv": {
+                "version": "3.11"
+            }
+        }
+    },
+    "multiple": {
+        "image": "alpine:latest",
+        "features": {
+            "pyenv": {
+                "version": "latest",
+                "additionalVersions": "3.9,3.10"
+            }
+        }
+    }
+}
