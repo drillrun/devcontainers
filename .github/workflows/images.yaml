@@ -14,7 +14,10 @@ jobs:
     strategy:
       matrix:
         image: ["alpine", "debian"]
-        tag: ["minimal"]
+        tag: ["minimal", "python"]
+        exclude:
+          - image: alpine
+            tag: python
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,16 +26,12 @@ jobs:
       - name: set paths-filter base
         id: set-pf-base
         run: |
-          BASE="main"
-          if [[ "${{ github.event.base_ref }}" == "refs/heads/main" ]]; then
-            BASE=$(get rev-parse --short HEAD~1)
-          fi
-
-          echo "base=${BASE}" >> $GITHUB_OUTPUT
+          echo "BASE=$(git rev-parse --short HEAD~1)" >> $GITHUB_OUTPUT
       - uses: dorny/paths-filter@v2
         id: changed
         with:
-          base: ${{ steps.set-pf-base.outputs.base }}
+          # base is ignored on pull-requests
+          base: ${{ steps.set-pf-base.outputs.base  }}
           filters: |
             image: [ 'images/${{ matrix.image }}/${{ matrix.tag }}/**' ]
       - name: Login to Docker Hub 🗝️
@@ -42,6 +41,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: devcontainers/ci@v0.3
+        if: ${{ steps.changed.outputs.image == 'true' }}
         with: 
           subFolder: images/${{ matrix.image }}/${{ matrix.tag }}
           imageName: ghcr.io/${{ github.repository}}/${{ matrix.image }}
