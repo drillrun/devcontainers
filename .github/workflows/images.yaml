@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         image: ["debian"]
-        tag: ["minimal", "python", "rust"]
+        tag: ["minimal"]
     steps:
       - uses: actions/checkout@v4
       - uses: devcontainers/ci@v0.3
