@@ -10,10 +10,11 @@ concurrency:
   cancel-in-progress: true
 jobs:
     test:
+      name: ${{ format('{0} ({1})', matrix.feature, matrix.image ) }}
       runs-on: ubuntu-latest
       strategy:
         matrix:
-          feature: ["git"]
+          feature: ["git", "easy-container-hooks", "pyenv"]
           image: ["alpine", "debian"]
           exclude:
             - feature: git
@@ -39,10 +40,11 @@ jobs:
               -f ${{ matrix.feature }}
     build:
       if: ${{ github.event.base_ref == 'refs/heads/main' }}
+      name: ${{ format('{0} ({1})', matrix.feature, matrix.image ) }}
       runs-on: ubuntu-latest
       strategy:
         matrix:
-          feature: ["git"]
+          feature: ["git", "easy-container-hooks", "pyenv"]
           image: ["alpine", "debian"]
           exclude:
             - feature: git
