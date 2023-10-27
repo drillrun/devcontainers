@@ -1,0 +1,67 @@
+name: "validate, test, build and publish features"
+on:
+    push:
+      branches: ["main"]
+    pull_request:
+      branches: ["main"]
+    workflow_dispatch:
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow_ref }}
+  cancel-in-progress: true
+jobs:
+    test:
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          feature: ["git"]
+          image: ["alpine", "debian"]
+          exclude:
+            - feature: git
+              image: debian
+      steps:
+        - uses: actions/checkout@v4
+        - uses: dorny/paths-filter@v2
+          id: changed
+          with:
+            filters: |
+              feature: [ 'features/**/${{ matrix.feature }}/**' ]
+        - uses: devcontainers/action@v1
+          if: matrix.feature != 'git' && steps.changed.outputs.feature == 'true'
+          with:
+            validate-only: true
+            base-path-to-features: features/src/
+        - if: steps.changed.outputs.feature == 'true'
+          run: |
+            npm install -g @devcontainers/cli
+            devcontainer features test \
+              -p features/             \
+              -i ${{ matrix.image }}   \
+              -f ${{ matrix.feature }}
+    build:
+      if: ${{ github.event.base_ref == 'refs/heads/main' }}
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          feature: ["git"]
+          image: ["alpine", "debian"]
+          exclude:
+            - feature: git
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      steps:
+        - uses: actions/checkout@v4
+        - uses: devcontainers/action@v1
+          with:
+            publish-features: true
+            base-path-to-features: features/src/
+            generate-docs: "true"
+        - uses: stefanzweifel/git-auto-commit-action@v5
+          with:
+            branch: auto-doc-update-${{ github.run_id }}
+            create_branch: true
+            commit_message: Automated documentation update for features.
+            file_pattern: features/src/**/README.md
+        - run: |
+            gh pr create                               \
+              --head auto-doc-update-${GITHUB_RUN_ID}  \
+              --fill-first

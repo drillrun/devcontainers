@@ -1,0 +1,36 @@
+name: "validate, test, build and publish images"
+on:
+    push:
+      branches: ["main"]
+    pull_request:
+      branches: ["main"]
+    workflow_dispatch:
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: ["alpine"]
+        tag: ["minimal"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changed
+        with:
+          filters: |
+            image: [ 'images/${{ matrix.image }}/${{ matrix.tag }}/**' ]
+      
+      - name: Login to Docker Hub 🗝️
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: devcontainers/ci@v0.3
+        with: 
+          subFolder: images/${{ matrix.image }}/${{ matrix.tag }}
+          imageName: ghcr.io/${{ github.repository}}/${{ matrix.image }}
+          imageTag: ${{ matrix.tag }}
