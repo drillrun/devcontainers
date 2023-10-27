@@ -31,7 +31,7 @@ jobs:
           with:
             validate-only: true
             base-path-to-features: features/src/
-        - if: matrix.feature != 'git' && steps.changed.outputs.feature == 'true'
+        - if: steps.changed.outputs.feature == 'true'
           run: |
             npm install -g @devcontainers/cli
             devcontainer features test \
