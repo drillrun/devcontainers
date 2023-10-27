@@ -21,7 +21,7 @@ jobs:
         uses: dorny/paths-filter@v2
         with:
           filters: |
-            image: [ 'images/${{ matrix.image }}/**' ]
+            image: [ 'images/${{ matrix.image }}/${{ matrix.tag }}/**' ]
       - uses: devcontainers/ci@v0.3
         if: steps.modifications.outputs.image == 'true'
         with: 
