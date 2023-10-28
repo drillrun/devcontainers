@@ -21,25 +21,25 @@ jobs:
               image: debian
       steps:
         - uses: actions/checkout@v4
+          with:
+            ref: ${{ github.ref }}
+            fetch-depth: 2
+        - name: set paths-filter base
+          id: set-pf-base
+          run: |
+            echo "BASE=$(git rev-parse --short HEAD~1)" >> $GITHUB_OUTPUT
         - uses: dorny/paths-filter@v2
           id: changed
           with:
+            # base is ignored on pull-requests
+            base: ${{ steps.set-pf-base.outputs.base  }}
             filters: |
               feature: [ 'features/**/${{ matrix.feature }}/**' ]
-        - uses: devcontainers/action@v1
-          if: matrix.feature != 'git' && steps.changed.outputs.feature == 'true'
-          with:
-            validate-only: true
-            base-path-to-features: features/src/
         - if: steps.changed.outputs.feature == 'true'
           run: |
             npm install -g @devcontainers/cli
-            devcontainer features test \
-              -p features/             \
-              -i ${{ matrix.image }}   \
-              -f ${{ matrix.feature }}
+            just test features/${{ matrix.feature }} ${{ matrix.image }}
     build:
-      if: ${{ github.event.base_ref == 'refs/heads/main' }}
       name: ${{ format('{0} ({1})', matrix.feature, matrix.image ) }}
       runs-on: ubuntu-latest
       strategy:
@@ -52,11 +52,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       steps:
         - uses: actions/checkout@v4
-        - uses: devcontainers/action@v1
-          with:
-            publish-features: true
-            base-path-to-features: features/src/
-            generate-docs: "true"
+        - run: |
+            npm install -g @devcontainers/cli
+            just publish features/${{ matrix.feature }}
+            just generate-docs features/${{ matrix.feature }}
         - uses: stefanzweifel/git-auto-commit-action@v5
           with:
             branch: auto-doc-update-${{ github.run_id }}
