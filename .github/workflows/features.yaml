@@ -42,13 +42,9 @@ jobs:
           run: |
             npm install -g @devcontainers/cli
             just test features/${{ matrix.feature }} ${{ matrix.image }}
-    build:
+    build-all:
       name: ${{ format('{0} ({1})', matrix.feature, matrix.image ) }}
       runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          feature: ["easy-container-hooks", "pyenv"]
-          image: ["alpine", "debian"]
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       steps:
