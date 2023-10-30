@@ -28,7 +28,9 @@ build target tag="all" push="false":
     TAG=${TAG##tag=}
 
     SHOULD_PUSH="{{ push }}"
-    SHOULD_PUSH=$( [[ "${SHOULD_PUSH##push=}" == "true" ]]);
+    SHOULD_PUSH=$([[ "${SHOULD_PUSH##push=}" == "true" ]]);
+
+    ( $SHOULD_PUSH && echo push) || echo no
 
     REPOSITORY="ghcr.io/drillrun/devcontainers";
 
@@ -52,5 +54,5 @@ build target tag="all" push="false":
         TAGGED="${REPOSITORY}/{{ target }}-${TAG}:latest"
 
         docker image tag ${IMAGE} $TAGGED;
-        ([[ $SHOULD_PUSH ]] && docker image push $TAGGED ) || /usr/bin/env true;
+        ($SHOULD_PUSH && docker image push $TAGGED ) || /usr/bin/env true;
     fi

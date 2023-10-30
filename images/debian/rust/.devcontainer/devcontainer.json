@@ -1,0 +1,8 @@
+{
+    "image": "ghcr.io/drillrun/devcontainers/images/debian-python:latest",
+    "features": {
+        "ghcr.io/devcontainers/features/rust:1": {}
+    },
+    "workspaceFolder": "/workspaces",
+    "remoteUser": "vscode"
+}
