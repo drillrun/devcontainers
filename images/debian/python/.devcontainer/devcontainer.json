@@ -1,5 +1,5 @@
 {
-    "image": "ghcr.io/drillrun/devcontainers/debian-minimal:latest",
+    "image": "ghcr.io/drillrun/devcontainers/images/debian-minimal:latest",
     "features": {
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1.3": {},

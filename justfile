@@ -28,7 +28,9 @@ build target tag="all" push="false":
     TAG=${TAG##tag=}
 
     SHOULD_PUSH="{{ push }}"
-    SHOULD_PUSH=${SHOULD_PUSH##push=}
+    SHOULD_PUSH=$( [[ "${SHOULD_PUSH##push=}" == "true" ]]);
+
+    REPOSITORY="ghcr.io/drillrun/devcontainers";
 
     if [[ "${TAG}" == "all" ]]; then
         for TAG in $(basename -a {{ join(target, "*/") }}); do
@@ -44,11 +46,11 @@ build target tag="all" push="false":
         IMAGE=$2;
 
         if [[ "${STATUS}" != "success" ]]; then
-            echo 1
+            exit 1
         fi
 
-        if [[ $SHOULD_PUSH ]]; then
-            docker image tag ${IMAGE}
-            docker image push
-        fi
+        TAGGED="${REPOSITORY}/{{ target }}-${TAG}:latest"
+
+        docker image tag ${IMAGE} $TAGGED;
+        ([[ $SHOULD_PUSH ]] && docker image push $TAGGED ) || /usr/bin/env true;
     fi
