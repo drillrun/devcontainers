@@ -60,6 +60,10 @@ jobs:
             commit_message: Automated documentation update for features.
             file_pattern: features/src/**/README.md
         - run: |
-            gh pr create                               \
-              --head auto-doc-update-${GITHUB_RUN_ID}  \
-              --fill-first
+            FATAL=$(git rev-parse auto-doc-update-${GITHUB_RUN_ID} -- 2>&1 > /dev/null)
+
+            if [[ -z "${FATAL}" ]]; then
+              gh pr create                               \
+                --head auto-doc-update-${GITHUB_RUN_ID}  \
+                --fill-first
+            fi
