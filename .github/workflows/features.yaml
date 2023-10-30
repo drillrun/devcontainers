@@ -14,16 +14,14 @@ jobs:
       runs-on: ubuntu-latest
       strategy:
         matrix:
-          feature: ["git", "easy-container-hooks", "pyenv"]
+          feature: ["easy-container-hooks", "pyenv"]
           image: ["alpine", "debian"]
-          exclude:
-            - feature: git
-              image: debian
       steps:
         - uses: actions/checkout@v4
           with:
             ref: ${{ github.ref }}
             fetch-depth: 2
+        - uses: extractions/setup-just
         - name: set paths-filter base
           id: set-pf-base
           run: |
@@ -44,14 +42,13 @@ jobs:
       runs-on: ubuntu-latest
       strategy:
         matrix:
-          feature: ["git", "easy-container-hooks", "pyenv"]
+          feature: ["easy-container-hooks", "pyenv"]
           image: ["alpine", "debian"]
-          exclude:
-            - feature: git
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       steps:
         - uses: actions/checkout@v4
+        - uses: extractions/setup-just
         - run: |
             npm install -g @devcontainers/cli
             just publish features/${{ matrix.feature }}
