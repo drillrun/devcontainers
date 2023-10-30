@@ -24,6 +24,7 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
+      - uses: extractions/setup-just@v1
       - name: set paths-filter base
         id: set-pf-base
         run: |
@@ -41,9 +42,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: devcontainers/ci@v0.3
-        if: ${{ steps.changed.outputs.image == 'true' }}
-        with: 
-          subFolder: images/${{ matrix.image }}/${{ matrix.tag }}
-          imageName: ghcr.io/${{ github.repository}}/${{ matrix.image }}
-          imageTag: ${{ matrix.tag }}
+      - run: |
+          just publish images/${{ matrix.image }} tag=${{ matrix.tag }}
+#      - uses: devcontainers/ci@v0.3
+#        if: ${{ steps.changed.outputs.image == 'true' }}
+#        with: 
+#          subFolder: images/${{ matrix.image }}/${{ matrix.tag }}
+#          imageName: ghcr.io/${{ github.repository}}/${{ matrix.image }}
+#          imageTag: ${{ matrix.tag }}
