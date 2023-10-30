@@ -47,8 +47,8 @@ build target tag="all" push="false":
             echo 1
         fi
 
-        if [[ $SHOULUD_PUSH ]]; then
-            docker image tag ${{IMAGE}} 
+        if [[ $SHOULD_PUSH ]]; then
+            docker image tag ${IMAGE}
         fi
 
 
