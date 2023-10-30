@@ -1,0 +1,21 @@
+{
+    "name": "pyenv",
+    "id": "pyenv",
+    "version": "1.0.0",
+    "options": {
+        "version": {
+            "type": "string",
+            "proposals": [
+                "3.12",
+                "3.11",
+                "3.10",
+                "3.9",
+                "3.8",
+                "latest",
+                "none"
+            ],
+            "default": "latest",
+            "description": "Select or enter a Ruby version to install"
+        }
+    }
+}

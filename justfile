@@ -12,18 +12,45 @@ test-all target image="alpine:latest":
 test target image="alpine:latest":
     devcontainer features test -p features -i {{ image }} --skip-scenarios -f {{ file_name(target) }}
 
-build target tag="all":
+publish target tag="all":
+    just publish-{{ parent_directory(target) }} {{ file_name(target) }} tag={{ replace(tag, "tag=", "") }}
+
+publish-features target tag="all":
+    devcontainer features publish -n drillrun/devcontainers/features features/src/{{ target }}
+
+publish-images target tag="all":
+    just build images/{{ target }} tag={{ replace(tag, "tag=", "") }} push=true
+
+build target tag="all" push="false":
     #!/usr/bin/env bash
-    if [[ "{{ tag }}" == "all" ]]; then
+
+    TAG="{{ tag }}"
+    TAG=${TAG##tag=}
+
+    SHOULD_PUSH="{{ push }}"
+    SHOULD_PUSH=$( [[ "${SHOULD_PUSH##push=}" == "true" ]]);
+
+    REPOSITORY="ghcr.io/drillrun/devcontainers";
+
+    if [[ "${TAG}" == "all" ]]; then
         for TAG in $(basename -a {{ join(target, "*/") }}); do
-            just build {{ target }} ${TAG} &
+            just build {{ target }} tag=${TAG} push=${SHOULD_PUSH} &
         done
 
         wait
     else
         set -eux
-        devcontainer build --workspace-folder {{ join(target, tag) }}
+
+        set -- $(devcontainer build --workspace-folder {{ join(target, "${TAG}") }} | jq -r "(.outcome, .imageName[0])");
+        STATUS=$1;
+        IMAGE=$2;
+
+        if [[ "${STATUS}" != "success" ]]; then
+            exit 1
+        fi
+
+        TAGGED="${REPOSITORY}/{{ target }}-${TAG}:latest"
+
+        docker image tag ${IMAGE} $TAGGED;
+        ([[ $SHOULD_PUSH ]] && docker image push $TAGGED ) || /usr/bin/env true;
     fi
-
-squish target tag="all":
-
