@@ -38,5 +38,26 @@ build target tag="all" push="false":
         wait
     else
         set -eux
-        devcontainer build --workspace-folder {{ join(target, "${TAG}") }} --push ${SHOULD_PUSH}
+
+        set -- $(devcontainer build --workspace-folder {{ join(target, "${TAG}") }} | jq -r "(.outcome, .imageName[0])");
+        STATUS=$1;
+        IMAGE=$2;
+
+        if [[ "${STATUS}" != "success" ]]; then
+            echo 1
+        fi
+
+        if [[ $SHOULUD_PUSH ]]; then
+            docker image tag ${{IMAGE}} 
+        fi
+
+
+
+        BUILT=$(devcontainer build --workspace-folder {{ join(target, "${TAG}") }} --push false | jq 
+        
+        if [[ $SHOULD_PUSH == "true" ]]; then
+            docker tag 
+        fi
+        
+        ${SHOULD_PUSH}
     fi

@@ -34,6 +34,11 @@ jobs:
             filters: |
               feature: [ 'features/**/${{ matrix.feature }}/**' ]
         - if: steps.changed.outputs.feature == 'true'
+          uses: devcontainers/action@v1
+          with:
+            validate-only: true
+            base-path-to-features: features/src/
+        - if: steps.changed.outputs.feature == 'true'
           run: |
             npm install -g @devcontainers/cli
             just test features/${{ matrix.feature }} ${{ matrix.image }}
@@ -48,11 +53,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       steps:
         - uses: actions/checkout@v4
-        - uses: extractions/setup-just@v1
-        - run: |
-            npm install -g @devcontainers/cli
-            just publish features/${{ matrix.feature }}
-            just generate-docs features/${{ matrix.feature }}
+        - uses: devcontainers/action@v1
+          with:
+              publish-features: ${{ github.ref == 'refs/heads/main' }}
+              features-namespace: ${{ github.repository }}/features
+              base-path-to-features: features/src/
+              generate-docs: "true"
         - uses: stefanzweifel/git-auto-commit-action@v5
           with:
             branch: auto-doc-update-${{ github.run_id }}
