@@ -10,51 +10,49 @@ concurrency:
   cancel-in-progress: true
 jobs:
     test:
+      name: test ${{ format('{0} ({1})', matrix.feature, matrix.image ) }}
       runs-on: ubuntu-latest
       strategy:
         matrix:
-          feature: ["git"]
+          feature: ["easy-container-hooks", "pyenv"]
           image: ["alpine", "debian"]
-          exclude:
-            - feature: git
-              image: debian
       steps:
         - uses: actions/checkout@v4
+          with:
+            ref: ${{ github.ref }}
+            fetch-depth: 2
+        - uses: extractions/setup-just@v1
+        - run: echo "PREV_COMMIT_SHA=$(git rev-parse HEAD~1)" >> $GITHUB_ENV
         - uses: dorny/paths-filter@v2
           id: changed
           with:
+            # base is ignored on pull-requests
+            base: ${{ env.PREV_COMMIT_SHA }}
             filters: |
               feature: [ 'features/**/${{ matrix.feature }}/**' ]
-        - uses: devcontainers/action@v1
-          if: matrix.feature != 'git' && steps.changed.outputs.feature == 'true'
+        - if: steps.changed.outputs.feature == 'true'
+          uses: devcontainers/action@v1
           with:
             validate-only: true
             base-path-to-features: features/src/
         - if: steps.changed.outputs.feature == 'true'
           run: |
             npm install -g @devcontainers/cli
-            devcontainer features test \
-              -p features/             \
-              -i ${{ matrix.image }}   \
-              -f ${{ matrix.feature }}
-    build:
-      if: ${{ github.event.base_ref == 'refs/heads/main' }}
+            just test features/${{ matrix.feature }} ${{ matrix.image }}
+    build-all:
+      needs: [test]
+      if: github.ref == 'refs/heads/main'
       runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          feature: ["git"]
-          image: ["alpine", "debian"]
-          exclude:
-            - feature: git
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       steps:
         - uses: actions/checkout@v4
         - uses: devcontainers/action@v1
           with:
-            publish-features: true
-            base-path-to-features: features/src/
-            generate-docs: "true"
+              publish-features: true
+              features-namespace: ${{ github.repository }}/features
+              base-path-to-features: features/src/
+              generate-docs: "true"
         - uses: stefanzweifel/git-auto-commit-action@v5
           with:
             branch: auto-doc-update-${{ github.run_id }}
