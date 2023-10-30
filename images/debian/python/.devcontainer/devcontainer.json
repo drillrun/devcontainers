@@ -1,0 +1,16 @@
+{
+    "image": "ghcr.io/drillrun/devcontainers/debian:minimal",
+    "features": {
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1.3": {},
+        "ghcr.io/devcontainers/features/node:1": {},
+        "ghcr.io/devcontainers-contrib/features/poetry:2": {},
+        "ghcr.io/christophermacgown/devcontainer-features/direnv:1": {},
+        "./features/easy-container-hooks": {},
+        "./features/pyenv": {
+            "version": "3.9"
+        }
+    },
+    "workspaceFolder": "/workspaces",
+    "remoteUser": "vscode"
+}

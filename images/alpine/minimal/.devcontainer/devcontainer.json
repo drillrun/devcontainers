@@ -1,15 +1,4 @@
 {
     "name": "alpine",
-    "image": "alpine",
-    "features": {
-        "ghcr.io/devcontainers/features/common-utils:2": {
-            "installZsh": "true",
-            "username": "vscode",
-            "userUid": "1000",
-            "userGid": "1000"
-        },
-        "./features/git": {
-            "version": "latest"
-        }
-    }
+    "image": "mcr.microsoft.com/devcontainers/base:alpine"
 }
