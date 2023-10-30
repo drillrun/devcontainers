@@ -49,15 +49,6 @@ build target tag="all" push="false":
 
         if [[ $SHOULD_PUSH ]]; then
             docker image tag ${IMAGE}
+            docker image push
         fi
-
-
-
-        BUILT=$(devcontainer build --workspace-folder {{ join(target, "${TAG}") }} --push false | jq 
-        
-        if [[ $SHOULD_PUSH == "true" ]]; then
-            docker tag 
-        fi
-        
-        ${SHOULD_PUSH}
     fi
