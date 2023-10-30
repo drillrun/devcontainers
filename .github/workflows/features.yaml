@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
     test:
-      name: ${{ format('{0} ({1})', matrix.feature, matrix.image ) }}
+      name: test ${{ format('{0} ({1})', matrix.feature, matrix.image ) }}
       runs-on: ubuntu-latest
       strategy:
         matrix:
