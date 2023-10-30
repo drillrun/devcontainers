@@ -43,7 +43,8 @@ jobs:
             npm install -g @devcontainers/cli
             just test features/${{ matrix.feature }} ${{ matrix.image }}
     build-all:
-      name: ${{ format('{0} ({1})', matrix.feature, matrix.image ) }}
+      needs: [test]
+      if: github.ref == 'refs/heads/main'
       runs-on: ubuntu-latest
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -51,7 +52,7 @@ jobs:
         - uses: actions/checkout@v4
         - uses: devcontainers/action@v1
           with:
-              publish-features: ${{ github.ref == 'refs/heads/main' }}
+              publish-features: true
               features-namespace: ${{ github.repository }}/features
               base-path-to-features: features/src/
               generate-docs: "true"
