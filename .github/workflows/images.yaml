@@ -43,9 +43,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - run: |
-        npm install -g @devcontainers/cli
+          npm install -g @devcontainers/cli
 
-        just publish images/${{ matrix.image }} tag=${{ matrix.tag }}
+          just publish images/${{ matrix.image }} tag=${{ matrix.tag }}
 #      - uses: devcontainers/ci@v0.3
 #        if: ${{ steps.changed.outputs.image == 'true' }}
 #        with: 
