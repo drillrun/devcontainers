@@ -21,6 +21,7 @@ Shell runner that executes hooks in your .devcontainer/hooks/ directory.
 | postCreateHookPath | - | string | post-create |
 | postStartHookPath | - | string | post-start |
 | updateContentHookPath | - | string | update-content |
+| recurseWorkspaceFolderHooks | Run hooks from other repositories in the workspace folder. | string | true |
 
 
 
