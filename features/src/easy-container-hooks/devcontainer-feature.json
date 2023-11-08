@@ -1,7 +1,7 @@
 {
     "name": "easy-container-hooks",
     "id": "easy-container-hooks",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Shell runner that executes hooks in your .devcontainer/hooks/ directory.",
     "options": {
         "hooksDir": {
@@ -33,6 +33,11 @@
             "description": "",
             "type": "string",
             "default": "update-content"
+        },
+        "recurseWorkspaceFolderHooks": {
+            "description": "Run hooks from other repositories in the workspace folder.",
+            "type": "string",
+            "default": "true"
         }
     },
     "onCreateCommand" :     ["/usr/local/bin/ezdc_onCreate.sh"],

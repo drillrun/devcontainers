@@ -29,7 +29,9 @@ get_hook_dir() {
 emit_hook() {
     local HOOK_DIR=$(echo $1 | sed s#//#/#);
 
-    cat ./run-hook.sh.tmpl | sed "s@#####REPLACE######@${HOOK_DIR}@";
+    cat ./run-hook.sh.tmpl | \
+        sed -e "s@#####REPLACE_HOOKS######@${HOOK_DIR}@" \
+            -e "s@#####_REPLACE_RECUR######@${RECURSEWORKSPACEFOLDERHOOKS}@"
 }
 
 for hook in "onCreate" "postAttach" "postCreate" "postStart" "updateContent"; do
