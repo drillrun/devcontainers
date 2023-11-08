@@ -2,10 +2,27 @@
 
 set -eux
 
-HOOKS=#####REPLACE######;
-WORKSPACE_DIR=$(pwd);
-WORKSPACE_HOOKS=${WORKSPACE_DIR}/${HOOKS};
-for HOOK in $(ls ${WORKSPACE_HOOKS}); do 
-    env WORKSPACE_DIR=${WORKSPACE_DIR} sh "${WORKSPACE_HOOKS}/${HOOK}"
-done
+run_hooks() {
+    set
+    local HOOK_DIR=$1;
+    local HOOK_SCRIPTS=$(ls "${HOOK_DIR}" 2>/dev/null);
 
+    for hook in ${HOOK_SCRIPTS}; do 
+        set -eux;
+        env WORKSPACE_DIR=${WORKSPACE} \
+         sh "${HOOK_DIR}/${hook}"
+    done
+}
+
+
+HOOKS=#####REPLACE_HOOKS######;
+RECURSE=#####_REPLACE_RECUR######;
+
+WORKSPACE=$(pwd);
+DEVCONTAINER_HOOKS_DIR="${WORKSPACE}/.devcontainer/${HOOKS}";
+GLOBSTAR_HOOKS_DIR="${WORKSPACE}/**/${HOOKS}";
+
+run_hooks "$DEVCONTAINER_HOOKS_DIR"
+if [ "$RECURSE" = "true" ]; then
+    run_hooks $GLOBSTAR_HOOKS_DIR
+fi
