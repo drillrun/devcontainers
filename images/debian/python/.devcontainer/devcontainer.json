@@ -6,6 +6,8 @@
         "ghcr.io/devcontainers/features/node:1": {},
         "ghcr.io/devcontainers-contrib/features/poetry:2": {},
         "ghcr.io/christophermacgown/devcontainer-features/direnv:1": {},
+        "ghcr.io/christophermacgown/devcontainer-features/mcfly:1": {},
+        "ghcr.io/christophermacgown/devcontainer-features/minio-client:1": {},
         "./features/easy-container-hooks": {},
         "./features/pyenv": {
             "version": "3.9"
