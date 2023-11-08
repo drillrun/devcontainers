@@ -8,8 +8,8 @@
         "ghcr.io/christophermacgown/devcontainer-features/direnv:1": {},
         "ghcr.io/christophermacgown/devcontainer-features/mcfly:1": {},
         "ghcr.io/christophermacgown/devcontainer-features/minio-client:1": {},
-        "./features/easy-container-hooks": {},
-        "./features/pyenv": {
+        "ghcr.io/drillrun/devcontainers/features/easy-container-hooks:1": {},
+        "ghcr.io/drillrun/devcontainers/features/pyenv:1": {
             "version": "3.9"
         }
     },
