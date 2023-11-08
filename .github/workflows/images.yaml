@@ -19,7 +19,7 @@ jobs:
         exclude:
           - image: alpine
             tag: python
-          - image:
+          - image: alpine
             tag: rust
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +41,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: devcontainers/ci@v0.3
-        if: ${{ steps.changed.outputs.image == 'true' }}
+        if: ${{ steps.changed.outputs.image == 'true' || github.event_name == 'workflow_dispatch' }}
         with: 
           subFolder: images/${{ matrix.image }}/${{ matrix.tag }}
           imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-${{ matrix.tag }}
