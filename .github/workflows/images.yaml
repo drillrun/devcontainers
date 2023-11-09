@@ -76,7 +76,7 @@ jobs:
               f.write(f"variants={json.dumps(variants)}")
   build-leaf:
     name: build-leaf ${{ matrix.image }}-${{ matrix.variant }}
-    needs: ["build-matrix"]
+    needs: ["build-matrix", "build-base"]
     runs-on: ubuntu-latest
     strategy:
       matrix:
