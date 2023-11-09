@@ -2,7 +2,6 @@
 
 set -exu
 
-
 get_hook_dir() {
     case $1 in
         onCreate)
