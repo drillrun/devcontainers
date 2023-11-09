@@ -1,5 +1,5 @@
 {
-    "image": "ghcr.io/drillrun/devcontainers/images/debian-python:latest",
+    "image": "ghcr.io/drillrun/devcontainers/images/debian-full:latest",
     "features": {
         "ghcr.io/devcontainers/features/rust:1": {}
     },

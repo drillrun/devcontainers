@@ -8,62 +8,81 @@ on:
       version:
         required: true
         type: string
-      images:
+      variants:
         default: '["all"]'
-        type: string
-      tags:
-        default: '["all"]'
-        type: string
+        type: "string"
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  build-base:
+    runs:
+    name: build-base ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image:
+          - alpine
+          - debian
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to Docker Hub 🗝️
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: ${{ matrix.image }}-minimal
+        uses: devcontainers/ci@v0.3
+        with: 
+          subFolder: images/${{ matrix.image }}/minimal
+          imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-minimal
+          imageTag: ${{github.event.inputs.version || github.ref_name }},latest
+      - if: ${{ matrix.image == 'debian' }}
+        name: ${{ matrix.image }}-full
+        uses: devcontainers/ci@v0.3
+        with: 
+          subFolder: images/${{ matrix.image }}/full
+          imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-full
+          imageTag: ${{github.event.inputs.version || github.ref_name }},latest
   build-matrix:
     runs-on: ubuntu-latest
     outputs:
-      images: ${{ steps.matrix.outputs.images }}
-      tags: ${{ steps.matrix.outputs.tags }}
+      variants: ${{ steps.matrix.outputs.variants }}
     steps:
       - uses: actions/checkout@v4
       - id: matrix
         shell: python
         run: |
+          #!/usr/bin/env python3
+
           import json
           import os
           import pathlib
 
-          IMAGES = [p.stem for p in pathlib.Path("images").glob("*")]
-          TAGS=list({p.stem for p in pathlib.Path("images").glob("**") if p.parent.stem in IMAGES})
+          ALL = object()
+          BASES = ["full", "minimal"]
+          IMAGES = list(pathlib.Path("images/").glob("*"))
+          VARIANTS = [variant for i in IMAGES for o in i.glob("*") if not (variant := o.stem) in BASES]
 
-          def filter_matrix_variant(variant, filters):
-            if "all" in filters:
-              return variant
-            else:
-              return [v for v in variant if v in filters]
-
-          requested_images = json.loads("""${{ github.event.inputs.images || '["all"]' }}""")
-          matrix_images = filter_matrix_variant(IMAGES, requested_images)
-
-          requested_tags = json.loads("""${{ github.event.inputs.tags || '["all"]' }}""")
-          matrix_tags = filter_matrix_variant(TAGS, requested_tags)
-
-          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-            print(os.environ["GITHUB_OUTPUT"])
-            print(f"images={json.dumps(matrix_images)}", file=f)
-            print(f"tags={json.dumps(matrix_tags)}", file=f)
-  image:
+          def parse_variants(variants):
+            variants = json.loads(variants)
+            if variants == ["all"]:
+              variants = ALL
+            return list({v for v in VARIANTS if variants is ALL or v in variants})
+          
+          if __name__ == "__main__":
+            variants = parse_variants("""${{ github.events.inputs.variantas || '["all"]' }}""")
+            with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"variants={json.dumps(variants)}")
+  build-leaf:
+    name: build-leaf ${{ matrix.image }}-${{ matrix.variant }}
+    needs: ["build-matrix"]
     runs-on: ubuntu-latest
-    name: build ${{ matrix.image }}/${{ matrix.tag }}
-    needs: [build-matrix]
     strategy:
       matrix:
-        image: ${{ fromJSON(needs.build-matrix.outputs.images ) }}
-        tag: ${{ fromJSON(needs.build-matrix.outputs.tags ) }}
-        exclude:
-          - image: alpine
-            tag: python
-          - image: alpine
-            tag: rust
+        image: ["debian"]
+        variant: ${{ fromJSON(needs.build-matrix.outputs.variants) }}
     steps:
       - uses: actions/checkout@v4
       - name: Login to Docker Hub 🗝️
@@ -74,6 +93,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: devcontainers/ci@v0.3
         with: 
-          subFolder: images/${{ matrix.image }}/${{ matrix.tag }}
-          imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-${{ matrix.tag }}
+          subFolder: images/${{ matrix.image }}/${{ matrix.variant }}
+          imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-${{ matrix.variant }}
           imageTag: ${{github.event.inputs.version || github.ref_name }},latest
