@@ -1,21 +1,64 @@
-name: "validate, test, build and publish images"
+name: release
 on:
-    push:
-      branches: ["main"]
-    pull_request:
-      branches: ["main"]
-    workflow_dispatch:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: string
+      images:
+        default: '["all"]'
+        type: string
+      tags:
+        default: '["all"]'
+        type: string
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  build:
-    name: ${{ format('{0}:{1}', matrix.image, matrix.tag) }}
+  build-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.matrix.outputs.images }}
+      tags: ${{ steps.matrix.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: matrix
+        shell: python
+        run: |
+          import json
+          import os
+          import pathlib
+
+          IMAGES = [p.stem for p in pathlib.Path("images").glob("*")]
+          TAGS=list({p.stem for p in pathlib.Path("images").glob("**") if p.parent.stem in IMAGES})
+
+          def filter_matrix_variant(variant, filters):
+            if "all" in filters:
+              return variant
+            else:
+              return [v for v in variant if v in filters]
+
+          requested_images = json.loads("""${{ github.event.inputs.images || '["all"]' }}""")
+          matrix_images = filter_matrix_variant(IMAGES, requested_images)
+
+          requested_tags = json.loads("""${{ github.event.inputs.tags || '["all"]' }}""")
+          matrix_tags = filter_matrix_variant(TAGS, requested_tags)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            print(os.environ["GITHUB_OUTPUT"])
+            print(f"images={json.dumps(matrix_images)}", file=f)
+            print(f"tags={json.dumps(matrix_tags)}", file=f)
+  image:
+    runs-on: ubuntu-latest
+    name: build ${{ matrix.image }}/${{ matrix.tag }}
+    needs: [build-matrix]
     strategy:
       matrix:
-        image: ["alpine", "debian"]
-        tag: ["minimal", "python", "rust"]
+        image: ${{ fromJSON(needs.build-matrix.outputs.images ) }}
+        tag: ${{ fromJSON(needs.build-matrix.outputs.tags ) }}
         exclude:
           - image: alpine
             tag: python
@@ -23,17 +66,6 @@ jobs:
             tag: rust
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 2
-      - run: echo "PREV_COMMIT_SHA=$(git rev-parse HEAD~1)" >> $GITHUB_ENV
-      - uses: dorny/paths-filter@v2
-        id: changed
-        with:
-          # base is ignored on pull-requests
-          base: ${{ env.PREV_COMMIT_SHA }}
-          filters: |
-            image: [ 'images/${{ matrix.image }}/${{ matrix.tag }}/**' ]
       - name: Login to Docker Hub 🗝️
         uses: docker/login-action@v2
         with:
@@ -41,8 +73,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: devcontainers/ci@v0.3
-        if: ${{ steps.changed.outputs.image == 'true' || github.event_name == 'workflow_dispatch' }}
         with: 
           subFolder: images/${{ matrix.image }}/${{ matrix.tag }}
           imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-${{ matrix.tag }}
-          imageTag: latest
+          imageTag: ${{github.event.inputs.version || github.ref_name }},latest
