@@ -1,13 +1,8 @@
 {
-    "image": "ghcr.io/drillrun/devcontainers/images/debian-minimal:latest",
+    "image": "ghcr.io/drillrun/devcontainers/images/debian-full:latest",
     "features": {
-        "ghcr.io/devcontainers/features/github-cli:1": {},
-        "ghcr.io/devcontainers/features/docker-outside-of-docker:1.3": {},
-        "ghcr.io/devcontainers/features/node:1": {},
         "ghcr.io/devcontainers-contrib/features/poetry:2": {},
-        "ghcr.io/christophermacgown/devcontainer-features/direnv:1": {},
-        "./features/easy-container-hooks": {},
-        "./features/pyenv": {
+        "ghcr.io/drillrun/devcontainers/features/pyenv:1": {
             "version": "3.9"
         }
     },
