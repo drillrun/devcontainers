@@ -36,14 +36,9 @@
       "integrity": "sha256:7d31b83459dd5110c37e7f5acb2920335cb1e5ebf014326d7eb6a0b290cc820a"
     },
     "ghcr.io/drillrun/devcontainers/features/easy-container-hooks:1": {
-      "version": "1.1.0",
-      "resolved": "ghcr.io/drillrun/devcontainers/features/easy-container-hooks@sha256:b6223ea07496e43cae35131b03c92c785771f954611787c1dcfe89c1353d92c3",
-      "integrity": "sha256:b6223ea07496e43cae35131b03c92c785771f954611787c1dcfe89c1353d92c3"
-    },
-    "ghcr.io/drillrun/devcontainers/features/pyenv:1": {
-      "version": "1.0.0",
-      "resolved": "ghcr.io/drillrun/devcontainers/features/pyenv@sha256:8b259916fd911e1c2873231126327a7a8f19ff6b887a3c817a70d774308d6d0b",
-      "integrity": "sha256:8b259916fd911e1c2873231126327a7a8f19ff6b887a3c817a70d774308d6d0b"
+      "version": "1.1.1",
+      "resolved": "ghcr.io/drillrun/devcontainers/features/easy-container-hooks@sha256:9589ea83ed46aeebc588dad3ba5b32638a88f8213204cc96af62b9b6cc69d5c3",
+      "integrity": "sha256:9589ea83ed46aeebc588dad3ba5b32638a88f8213204cc96af62b9b6cc69d5c3"
     }
   }
 }
