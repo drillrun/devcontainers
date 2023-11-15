@@ -31,8 +31,6 @@ jobs:
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v2
       - uses: devcontainers/ci@v0.3
-        env:
-          BUILDX_NO_DEFAULT_ATTESTATIONS: true
         with:
           imageName: ghcr.io/drillrun/devcontainers/images/alpine-minimal
           imageTag: ${{ github.event.inputs.version || github.ref_name }},latest
