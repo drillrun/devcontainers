@@ -25,6 +25,10 @@ jobs:
           - debian
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@v2
       - name: Login to Docker Hub 🗝️
         uses: docker/login-action@v2
         with:
@@ -34,16 +38,18 @@ jobs:
       - name: ${{ matrix.image }}-minimal
         uses: devcontainers/ci@v0.3
         with: 
-          subFolder: images/${{ matrix.image }}/minimal
           imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-minimal
           imageTag: ${{github.event.inputs.version || github.ref_name }},latest
+          platform: linux/amd64,linux/arm64
+          subFolder: images/${{ matrix.image }}/minimal
       - if: ${{ matrix.image == 'debian' }}
         name: ${{ matrix.image }}-full
         uses: devcontainers/ci@v0.3
         with: 
-          subFolder: images/${{ matrix.image }}/full
           imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-full
           imageTag: ${{github.event.inputs.version || github.ref_name }},latest
+          subFolder: images/${{ matrix.image }}/full
+          platform: linux/amd64,linux/arm64
   build-matrix:
     runs-on: ubuntu-latest
     outputs:
@@ -96,7 +102,7 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - uses: devcontainers/ci@v0.3
         with: 
-          subFolder: images/${{ matrix.image }}/${{ matrix.variant }}
-          platform: linux/amd64,linux/arm64
           imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-${{ matrix.variant }}
           imageTag: ${{github.event.inputs.version || github.ref_name }},latest
+          platform: linux/amd64,linux/arm64
+          subFolder: images/${{ matrix.image }}/${{ matrix.variant }}
