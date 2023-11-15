@@ -35,6 +35,11 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
       - uses: docker/setup-buildx-action@v2
+      - run: |
+          echo "XXXXX DEBUG XXXXX"
+          skopeo --version
+          echo "XXXXX DEBUG XXXXX"
+
       - name: ${{ matrix.image }}-minimal
         uses: devcontainers/ci@v0.3
         env:
@@ -46,6 +51,8 @@ jobs:
           subFolder: images/${{ matrix.image }}/minimal
       - if: ${{ matrix.image == 'debian' }}
         name: ${{ matrix.image }}-full
+        env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: true
         uses: devcontainers/ci@v0.3
         with: 
           imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-full
