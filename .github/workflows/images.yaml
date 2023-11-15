@@ -90,6 +90,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@v2
       - uses: devcontainers/ci@v0.3
         with: 
           subFolder: images/${{ matrix.image }}/${{ matrix.variant }}
