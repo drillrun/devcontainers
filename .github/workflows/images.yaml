@@ -15,108 +15,25 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  build-base:
-    name: build-base ${{ matrix.image }}
+  alpine:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        image:
-          - alpine
-          - debian
     steps:
       - uses: actions/checkout@v4
-      - name: Login to Docker Hub 🗝️
-        uses: docker/login-action@v2
+      - name: 🗝️ login to ghcr.io 🗝️
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v2
-      - name: ${{ matrix.image }}-minimal
-        uses: devcontainers/ci@v0.3
-        env:
-           BUILDX_NO_DEFAULT_ATTESTATIONS: true
-        with: 
-          imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-minimal
-          imageTag: ${{github.event.inputs.version || github.ref_name }},latest
-          platform: linux/amd64,linux/arm64
-          subFolder: images/${{ matrix.image }}/minimal
-      - if: ${{ matrix.image == 'debian' }}
-        name: ${{ matrix.image }}-full
-        env:
-           BUILDX_NO_DEFAULT_ATTESTATIONS: true
-        uses: devcontainers/ci@v0.3
-        with: 
-          imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-full
-          imageTag: ${{github.event.inputs.version || github.ref_name }},latest
-          subFolder: images/${{ matrix.image }}/full
-          platform: linux/amd64,linux/arm64
-  build-matrix:
-    runs-on: ubuntu-latest
-    outputs:
-      variants: ${{ steps.matrix.outputs.variants }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: matrix
-        shell: python
-        run: |
-          #!/usr/bin/env python3
-
-          import json
-          import os
-          import pathlib
-
-          ALL = object()
-          BASES = ["full", "minimal"]
-          IMAGES = list(pathlib.Path("images/").glob("*"))
-          VARIANTS = [variant for i in IMAGES for o in i.glob("*") if not (variant := o.stem) in BASES]
-
-          def parse_variants(variants):
-            variants = json.loads(variants)
-            if variants == ["all"]:
-              variants = ALL
-            return list({v for v in VARIANTS if variants is ALL or v in variants})
-          
-          if __name__ == "__main__":
-            variants = parse_variants("""${{ github.events.inputs.variantas || '["all"]' }}""")
-            with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-              f.write(f"variants={json.dumps(variants)}")
-  build-leaf:
-    name: build-leaf ${{ matrix.image }}-${{ matrix.variant }}
-    needs: ["build-matrix", "build-base"]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        image: ["debian"]
-        variant: ${{ fromJSON(needs.build-matrix.outputs.variants) }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Update Skopeo 
-        run: |
-          REPO_URL="https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable/xUbuntu_22.04"
-          sudo sh -c "echo 'deb ${REPO_URL}/ /' > /etc/apt/sources.list.d/skopeo.list"
-          curl -fsSL ${REPO_URL}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/skopeo.gpg > /dev/null
-          sudo apt update
-          sudo apt install skopeo
-      - name: Login to Docker Hub 🗝️
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/setup-qemu-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64
       - uses: docker/setup-buildx-action@v2
       - uses: devcontainers/ci@v0.3
         env:
           BUILDX_NO_DEFAULT_ATTESTATIONS: true
-        with: 
-          imageName: ghcr.io/${{ github.repository}}/images/${{ matrix.image }}-${{ matrix.variant }}
-          imageTag: ${{github.event.inputs.version || github.ref_name }},latest
+        with:
+          imageName: ghcr.io/drillrun/devcontainers/images/alpine-minimal
+          imageTag: ${{ github.event.inputs.version || github.ref_name }},latest
           platform: linux/amd64,linux/arm64
-          subFolder: images/${{ matrix.image }}/${{ matrix.variant }}
+          subFolder: images/alpine/minimal
