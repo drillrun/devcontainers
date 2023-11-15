@@ -15,6 +15,11 @@
       "resolved": "ghcr.io/christophermacgown/devcontainer-features/minio-client@sha256:2783caf6f583986a9ae40b3329b2ef63fb41de4637361569163732eb8ec7307e",
       "integrity": "sha256:2783caf6f583986a9ae40b3329b2ef63fb41de4637361569163732eb8ec7307e"
     },
+    "ghcr.io/devcontainers-contrib/features/gh-release:1": {
+      "version": "1.0.24",
+      "resolved": "ghcr.io/devcontainers-contrib/features/gh-release@sha256:e872bdca40c84c006368381e0f4af111db63f54461abe4434884bc36e29995d9",
+      "integrity": "sha256:e872bdca40c84c006368381e0f4af111db63f54461abe4434884bc36e29995d9"
+    },
     "ghcr.io/devcontainers-contrib/features/poetry:2": {
       "version": "2.0.17",
       "resolved": "ghcr.io/devcontainers-contrib/features/poetry@sha256:85ad0e0190682104214e5ae4faa2bf8c2e181802567c01db0ef2dc9a70790f32",

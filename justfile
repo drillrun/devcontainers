@@ -21,29 +21,30 @@ publish-features target tag="all":
 publish-images target tag="all":
     just build images/{{ target }} tag={{ replace(tag, "tag=", "") }} push=true
 
-build target tag="all" push="false":
+build target tag="all" push="false" arch="linux/amd64":
     #!/usr/bin/env bash
 
+    ARCH="{{ arch }}";
+    ARCH=${ARCH##arch=};
+
     TAG="{{ tag }}"
-    TAG=${TAG##tag=}
+    TAG=${TAG##tag=};
 
     SHOULD_PUSH="{{ push }}"
-    SHOULD_PUSH=$([[ "${SHOULD_PUSH##push=}" == "true" ]]);
-
-    ( $SHOULD_PUSH && echo push) || echo no
+    SHOULD_PUSH=[ "${SHOULD_PUSH##push=}" == "true" ]; SHOULD_PUSH=$?;
 
     REPOSITORY="ghcr.io/drillrun/devcontainers";
 
     if [[ "${TAG}" == "all" ]]; then
         for TAG in $(basename -a {{ join(target, "*/") }}); do
-            just build {{ target }} tag=${TAG} push=${SHOULD_PUSH} &
+            just build {{ target }} tag=${TAG} push=${SHOULD_PUSH} arch=${ARCH} &
         done
 
         wait
     else
         set -eux
 
-        set -- $(devcontainer build --workspace-folder {{ join(target, "${TAG}") }} | jq -r "(.outcome, .imageName[0])");
+        set -- $(devcontainer build --platform ${ARCH} --workspace-folder {{ join(target, "${TAG}") }} | jq -r "(.outcome, .imageName[0])");
         STATUS=$1;
         IMAGE=$2;
 
@@ -54,5 +55,8 @@ build target tag="all" push="false":
         TAGGED="${REPOSITORY}/{{ target }}-${TAG}:latest"
 
         docker image tag ${IMAGE} $TAGGED;
-        ($SHOULD_PUSH && docker image push $TAGGED ) || /usr/bin/env true;
+
+        if [ $SHOULD_PUSH = 0 ]; then
+            docker image push $TAGGED;
+        fi
     fi
