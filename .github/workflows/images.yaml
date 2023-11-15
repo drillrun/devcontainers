@@ -45,6 +45,7 @@ jobs:
       - run: |
           echo "XXXXX DEBUG XXXXX"
           skopeo --version
+          buildx --version
           echo "XXXXX DEBUG XXXXX"
 
       - name: ${{ matrix.image }}-minimal
