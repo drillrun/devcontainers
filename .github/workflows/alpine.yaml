@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   alpine:
-    uses: ./.github/workflows/build-and-release-images.yaml@main
+    uses: ./.github/workflows/build-and-release-images.yaml
     secrets: inherit
     with:
       image: alpine-minimal
