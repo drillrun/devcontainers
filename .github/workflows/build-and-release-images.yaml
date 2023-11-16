@@ -30,7 +30,7 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/${{ github.repository }}/${{ inputs.name }}
+          imageName: ghcr.io/${{ github.repository }}/${{ inputs.image }}
           imageTag: ${{ inputs.version }}
           platform: ${{ inputs.platform || '' }}
           subFolder: ${{ inputs.path }}
