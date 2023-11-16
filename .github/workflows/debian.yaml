@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   minimal:
-    uses: ./build-and-release-images.yaml@main
+    uses: ./.github/workflows/build-and-release-images.yaml@main
     secrets: inherit
     with:
       image: debian-minimal
@@ -21,7 +21,7 @@ jobs:
       platform: linux/amd64,linux/arm64
       path: images/debian/minimal
   full:
-    uses: ./build-and-release-images.yaml@main
+    uses: ./.github/workflows/build-and-release-images.yaml@main
     secrets: inherit
     with:
       image: debian-full
