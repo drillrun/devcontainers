@@ -1,7 +1,7 @@
 on:
   workflow_call:
     inputs:
-      name:
+      image:
         type: string
         required: true
       path:
