@@ -1,0 +1,1 @@
+FROM ghcr.io/drillrun/devcontainers/images/debian-minimal:latest

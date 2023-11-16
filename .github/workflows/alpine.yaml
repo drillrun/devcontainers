@@ -1,0 +1,22 @@
+name: alpine
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: true
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  alpine:
+    uses: ./build-and-release-images.yaml@main
+    secrets: inherit
+    with:
+      image: alpine-minimal
+      version: ${{ inputs.version || github.ref_name }},latest
+      platform: linux/amd64,linux/arm64
+      path: images/alpine/minimal

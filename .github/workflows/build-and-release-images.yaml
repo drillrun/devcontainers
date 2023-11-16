@@ -1,21 +1,19 @@
-name: release
 on:
-  push:
-    tags:
-      - '*'
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      version:
-        required: true
+      name:
         type: string
-      variants:
-        default: '["all"]'
-        type: "string"
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
+        required: true
+      path:
+        type: string
+        required: true
+      platform:
+        type: string
+      version:
+        type: string
+        required: true
 jobs:
-  alpine:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,7 +30,7 @@ jobs:
       - uses: docker/setup-buildx-action@v2
       - uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/drillrun/devcontainers/images/alpine-minimal
-          imageTag: ${{ github.event.inputs.version || github.ref_name }},latest
-          platform: linux/amd64,linux/arm64
-          subFolder: images/alpine/minimal
+          imageName: ghcr.io/${{ github.repository }}/${{ inputs.name }}
+          imageTag: ${{ inputs.version }}
+          platform: ${{ inputs.platform || '' }}
+          subFolder: ${{ inputs.path }}

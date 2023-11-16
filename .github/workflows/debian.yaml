@@ -1,0 +1,30 @@
+name: debian
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: true
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  minimal:
+    uses: ./build-and-release-images.yaml@main
+    secrets: inherit
+    with:
+      image: debian-minimal
+      version: ${{ inputs.version || github.ref_name }},latest
+      platform: linux/amd64,linux/arm64
+      path: images/debian/minimal
+  full:
+    uses: ./build-and-release-images.yaml@main
+    secrets: inherit
+    with:
+      image: debian-full
+      version: ${{ inputs.version || github.ref_name }},latest
+      platform: linux/amd64,linux/arm64
+      path: images/debian/full

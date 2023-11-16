@@ -1,5 +1,8 @@
 {
-    "image": "ghcr.io/drillrun/devcontainers/images/debian-minimal:latest",
+    "build": {
+		// Path is relative to the devcontainer.json file.
+		"dockerfile": "Dockerfile"
+	},
     "features": {
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1.3": {},
